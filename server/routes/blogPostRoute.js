@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {createBlogPost,getBlogPosts,getBlogPostAtHome,getBlogPostById,getBlogPostBySlug,getPopularPost,getRecentPost,updateBlogPost,deleteBlogPost} = require('../controllers/blogPostController');
 const {jwt}=require('../middlewares/jwt');
+const uploadFile = require('../middlewares/fileUploadToDO');
 
-router.post('/',jwt,createBlogPost);
+router.post('/',jwt,uploadFile,createBlogPost);
 router.get('/',getBlogPosts);
 router.get('/slug/:slug',getBlogPostBySlug);
 router.get('/home/:page',getBlogPostAtHome);

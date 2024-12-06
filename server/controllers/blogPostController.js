@@ -1,4 +1,3 @@
-const { get } = require('mongoose');
 const BlogPost = require('../models/blogPostModel');
 
 const createBlogPost = async (req, res) => {
@@ -120,6 +119,9 @@ const updateBlogPost = async (req, res) => {
         if(!blogPost){
             return res.status(400).json({success:false,message:'No blog post found'});
         }
+        blogPost.slug = blogPost.title.replace(/ /g, '-').toLowerCase();
+        blogPost.updatedAt = Date.now();
+        await blogPost.save();
         return res.status(200).json({success:true,message:'Blog post updated successfully'});
     }
     catch(error){
