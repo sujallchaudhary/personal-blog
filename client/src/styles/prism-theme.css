@@ -1,0 +1,54 @@
+/* Add syntax highlighting styles */
+@import 'react-quill/dist/quill.snow.css';
+
+.ql-editor {
+  @apply prose dark:prose-invert max-w-none;
+  min-height: 200px;
+}
+
+.prose {
+  @apply dark:text-gray-300;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply dark:text-white scroll-mt-24;
+}
+
+.prose code {
+  @apply dark:text-gray-200 dark:bg-gray-800 bg-gray-100 px-1 py-0.5 rounded;
+}
+
+.prose pre {
+  @apply dark:bg-gray-800 bg-gray-100;
+}
+
+.prose a {
+  @apply dark:text-blue-400 text-blue-600 no-underline hover:underline;
+}
+
+.prose blockquote {
+  @apply dark:border-gray-700 dark:text-gray-400;
+}
+
+.prose strong {
+  @apply dark:text-white;
+}
+
+.prose img {
+  @apply rounded-lg shadow-md;
+}
+
+/* Custom styles for the blog content */
+.blog-content {
+  @apply prose dark:prose-invert max-w-none;
+  @apply prose-headings:scroll-mt-24;
+  @apply prose-a:no-underline prose-a:text-blue-600 dark:prose-a:text-blue-400;
+}
+
+.blog-content :where(h1, h2, h3, h4) {
+  @apply font-semibold dark:text-white mt-8 mb-4;
+}
+
+.blog-content :where(p, ul, ol) {
+  @apply leading-7;
+}

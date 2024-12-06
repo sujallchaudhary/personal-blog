@@ -44,7 +44,7 @@ const getBlogPostAtHome = async (req, res) => {
     const limit = 5;
     const startIndex = (page - 1) * limit;
     try{
-        const blogPosts = await BlogPost.find({isDeleted:false}).select('title slug thumbnail createdAt views').populate('author','name').sort({createdAt:-1}).limit(limit).skip(startIndex);
+        const blogPosts = await BlogPost.find({isDeleted:false}).select('title excerpt slug thumbnail createdAt views').populate('author','name').sort({createdAt:-1}).limit(limit).skip(startIndex);
         if(!blogPosts){
             return res.status(400).json({success:false,message:'No blog post found'});
         }
@@ -90,7 +90,7 @@ const getBlogPostBySlug = async (req, res) => {
 };
 const getPopularPost = async (req, res) => {
     try{
-        const blogPosts = await BlogPost.find({isDeleted:false}).select('title slug thumbnail views').populate('author','name').sort({views:-1}).limit(5);
+        const blogPosts = await BlogPost.find({isDeleted:false}).select('title slug thumbnail views createdAt').populate('author','name').sort({views:-1}).limit(5);
         if(!blogPosts){
             return res.status(400).json({success:false,message:'No blog post found'});
         }
@@ -102,7 +102,7 @@ const getPopularPost = async (req, res) => {
 };
 const getRecentPost = async (req, res) => {
     try{
-        const blogPosts = await BlogPost.find({isDeleted:false}).select('title slug thumbnail createdAt').populate('author','name').sort({createdAt:-1}).limit(5);
+        const blogPosts = await BlogPost.find({isDeleted:false}).select('title slug thumbnail views createdAt').populate('author','name').sort({createdAt:-1}).limit(5);
         if(!blogPosts){
             return res.status(400).json({success:false,message:'No blog post found'});
         }
