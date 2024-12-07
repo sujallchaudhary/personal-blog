@@ -6,7 +6,7 @@ const createBlogPost = async (req, res) => {
         if(!title || !content || !category || !tags || !file){
             return res.status(400).json({success:false,message:'All fields are required'});
         }
-        const slug = title.replace(/ /g, '-').toLowerCase();
+        const slug = title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/ /g, '-').toLowerCase();
         const blogPost = BlogPost.create({
             title,
             content,

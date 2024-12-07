@@ -34,7 +34,7 @@ const SideWidget: React.FC<SideWidgetProps> = () => {
   }, [fetchPopularPosts, fetchLatestPosts]);
 
   return (
-<aside className="space-y-6 bg-white dark:bg-black p-4 rounded-lg w-full max-w-xs lg:sticky lg:top-0 lg:self-start">
+<aside className="space-y-6 bg-gray-100 dark:bg-black p-4 rounded-lg w-full max-w-xs lg:sticky lg:top-0 lg:self-start">
   <div>
     <h3 className="text-lg font-bold mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">Latest Posts</h3>
     <ul className="space-y-3">

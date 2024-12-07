@@ -15,7 +15,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         <img 
           src={post.thumbnail} 
           alt={post.title}
-          className="w-full h-72 object-cover"
+          className="w-full h-96 object-cover"
         />
       )}
       <div className="p-6">

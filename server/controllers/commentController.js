@@ -1,4 +1,3 @@
-//createComment,getCommentsByBlogPostId,approveComment,deleteComment
 const BlogPost = require('../models/blogPostModel');
 const Comment = require('../models/commentModel');
 const createComment = async (req, res) => {
@@ -11,11 +10,11 @@ const createComment = async (req, res) => {
         if(!blogPost){
             return res.status(400).json({success:false,message:'Invalid blog post'});
         }
-        const newComment = Comment.create({name,comment,blogPost:blogPostId});
+        const newComment =await Comment.create({name,comment,blogPost:blogPostId});
         if(!newComment){
             return res.status(400).json({success:false,message:'Unable to create comment'});
         }
-        return res.status(201).json({success:true,message:'Comment created successfully'});
+        return res.status(201).json({success:true,message:'Comment created successfully',data:newComment});
     }
     catch(error){
         return res.status(500).json({success:false,message:'Internal server error'+error});

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Eye, Calendar, User, CheckCircle } from 'lucide-react';
+import { Eye, Calendar, User, CheckCircle,Share2Icon} from 'lucide-react';
 import SideWidget from '../components/SideWidget';
 import '../styles/prism-theme.css';
 import useHttpRequest from '../hooks/useHttpRequest';
 import { BlogPost, Comment } from '../types/blog';
+import { Helmet } from 'react-helmet';
 
 const BlogPostC: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -16,7 +17,7 @@ const BlogPostC: React.FC = () => {
   const authToken = localStorage.getItem('token');
 
   const { sendRequest: fetchPost } = useHttpRequest<{ success: boolean; blogPost: BlogPost }>();
-  const { sendRequest: fetchComments } = useHttpRequest<{success:boolean; data:Comment[]}>();
+  const { sendRequest: fetchComments } = useHttpRequest<{ success: boolean; data: Comment[] }>();
   const { sendRequest: postComment } = useHttpRequest();
   const { sendRequest: approveComment } = useHttpRequest();
 
@@ -27,7 +28,6 @@ const BlogPostC: React.FC = () => {
           url: `${import.meta.env.VITE_API_ENDPOINT}/blog/slug/${slug}`,
           method: 'GET',
         });
-        console.log(data)
         const postData = data.blogPost;
         setPost(postData);
 
@@ -41,6 +41,7 @@ const BlogPostC: React.FC = () => {
             method: 'GET',
             headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
           });
+
           setComments(commentsData.data);
         }
       } catch (error) {
@@ -50,6 +51,17 @@ const BlogPostC: React.FC = () => {
 
     getPostAndComments();
   }, [slug, fetchPost, fetchComments, authToken]);
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: post?.title,
+        text: post?.excerpt,
+        url: window.location.href,
+      });
+    } else {
+      alert('Web Share API not supported in your browser.');
+    }
+  };
 
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,12 +69,12 @@ const BlogPostC: React.FC = () => {
 
     try {
       const comment = { blogPostId: post?._id, name: commentName, comment: newComment };
-      const commentData = await postComment({
-        url: import.meta.env.VITE_API_ENDPOINT+'/comment',
+      const commentData: { success: boolean; data: Comment} = await postComment({
+        url: import.meta.env.VITE_API_ENDPOINT + '/comment',
         method: 'POST',
         body: comment,
       });
-      setComments((prev) => [...prev, commentData]);
+      setComments((prev) => [...prev, commentData.data]);
       setNewComment('');
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -78,7 +90,7 @@ const BlogPostC: React.FC = () => {
       });
       setComments((prev) =>
         prev.map((comment) =>
-          comment._id === commentId ? { ...comment, approved: true } : comment
+          comment._id === commentId ? { ...comment, isApproved: true } : comment
         )
       );
     } catch (error) {
@@ -92,6 +104,21 @@ const BlogPostC: React.FC = () => {
 
   return (
     <div className="max-w-8xl mx-auto">
+    <Helmet>
+    <title>{post.title} - Sujal Unfolded</title>
+    <meta name="description" content={post.excerpt} />
+    <meta name="keywords" content={post.tags} />
+    <meta name="author" content="Your Name or Site" />
+    <meta property="og:title" content={post.title} />
+    <meta property="og:description" content={post.excerpt} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={window.location.href} />
+    <meta property="og:image" content={post.thumbnail} />
+    <meta name="twitter:card" content={post.thumbnail} />
+    <meta name="twitter:title" content={post.title} />
+    <meta name="twitter:description" content={post.excerpt} />
+    <meta name="twitter:image" content={post.thumbnail} />
+  </Helmet>
       <div className="grid grid-cols-12 gap-8">
         {/* Main Content */}
         <article className="col-span-12 lg:col-span-7 xl:col-span-8">
@@ -99,7 +126,7 @@ const BlogPostC: React.FC = () => {
             <img
               src={post.thumbnail}
               alt={post.title}
-              className="w-full h-64 object-cover rounded-lg mb-8"
+              className="w-full h-96 object-cover rounded-lg mb-8"
             />
           )}
 
@@ -117,6 +144,9 @@ const BlogPostC: React.FC = () => {
             <div className="flex items-center">
               <Eye className="w-4 h-4 mr-2" />
               <span>{post.views} views</span>
+            </div>
+            <div className="flex items-center">
+             <a href="#"><Share2Icon className="w-4 h-4 mr-2" onClick={handleShare} /></a> 
             </div>
           </div>
 
@@ -154,7 +184,12 @@ const BlogPostC: React.FC = () => {
             </div>
 
             <form className="mt-8" onSubmit={handlePostComment}>
-              <input className='w-full p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-4' value={commentName} onChange={(e)=> setCommentName(e.target.value)} placeholder='Enter Your Name' />
+              <input
+                className="w-full p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-4"
+                value={commentName}
+                onChange={(e) => setCommentName(e.target.value)}
+                placeholder="Enter Your Name"
+              />
               <textarea
                 className="w-full p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 rows={4}
@@ -174,7 +209,7 @@ const BlogPostC: React.FC = () => {
 
         {/* Right Sidebar */}
         <div className="col-span-12 lg:col-span-4">
-          <SideWidget/>
+          <SideWidget />
         </div>
       </div>
     </div>
