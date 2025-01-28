@@ -28,7 +28,7 @@ const BlogPostC: React.FC = () => {
           url: `${import.meta.env.VITE_API_ENDPOINT}/blog/slug/${slug}`,
           method: 'GET',
         });
-        const postData = data.blogPost;
+        const postData = data.data;
         setPost(postData);
 
         if (postData?._id) {
