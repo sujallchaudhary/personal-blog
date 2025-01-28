@@ -38,6 +38,9 @@ const blogPostSchema = new mongoose.Schema({
     thumbnail:{
         type:String
     },
+    aiDiscussionAudio:{
+        type:String
+    },
     isDeleted:{
         type:Boolean,
         default:false

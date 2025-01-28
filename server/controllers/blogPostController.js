@@ -2,7 +2,7 @@ const BlogPost = require('../models/blogPostModel');
 
 const createBlogPost = async (req, res) => {
     try{
-        const {title,content,excerpt,category,tags,file}=req.body;
+        const {title,content,excerpt,category,tags,file,aiDiscussionAudio}=req.body;
         if(!title || !content || !category || !tags || !file){
             return res.status(400).json({success:false,message:'All fields are required'});
         }
@@ -16,6 +16,7 @@ const createBlogPost = async (req, res) => {
             category,
             tags,
             thumbnail:file,
+            aiDiscussionAudio
         });
         if(!blogPost){
             return res.status(400).json({success:false,message:'Unable to create blog post'});
@@ -74,18 +75,31 @@ const getBlogPostById = async (req, res) => {
 };
 const getBlogPostBySlug = async (req, res) => {
     const slug = req.params.slug;
-    try{
-        const blogPost = await BlogPost.findOne({slug,isDeleted:false}).populate('author','name');
-        if(!blogPost){
-            return res.status(400).json({success:false,message:'No blog post found'});
+    try {
+        const blogPost = await BlogPost.findOne({ slug, isDeleted: false }).populate('author', 'name');
+        
+        if (!blogPost) {
+            return res.status(400).json({ success: false, message: 'No blog post found' });
         }
-        blogPost.views += 1;
-        blogPost.save();
-        return res.status(200).json({success:true,blogPost});
+        const previousPost = await BlogPost.findOne({ slug: { $lt: slug }, isDeleted: false })
+            .sort({ slug: -1 })
+            .select('slug');
+        const nextPost = await BlogPost.findOne({ slug: { $gt: slug }, isDeleted: false })
+            .sort({ slug: 1 })
+            .select('slug');
 
-    }
-    catch(error){
-        return res.status(500).json({success:false,message:'Internal server error'+error});
+        blogPost.views += 1;
+        await blogPost.save();
+
+        return res.status(200).json({
+            success: true,
+            data: blogPost,
+            previousSlug: previousPost ? previousPost.slug : null,
+            nextSlug: nextPost ? nextPost.slug : null,
+        });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal server error: ' + error });
     }
 };
 const getPopularPost = async (req, res) => {
@@ -142,6 +156,35 @@ const deleteBlogPost = async (req, res) => {
     }
 };
 
+const getBlogMetaData = async(req,res)=>{
+    try{
+        const slug = req.params.slug;
+        const blogPost = await BlogPost.findOne({slug,isDeleted:false}).populate('author','name').select('title slug excerpt tags thumbnail author');
+        if(!blogPost){
+            return res.status(400).json({success:false,message:'No blog post found'});
+        }
+        return res.status(200).json({success:true,data:blogPost});
+
+
+    }
+    catch(error){
+        return res.status(500).json({success:false,message:'Internal server error'+error});
+    }
+}
+
+const getBlogSiteMap = async(req,res)=>{
+    try {
+        const blogPosts = await BlogPost.find({isDeleted:false}).select('slug updatedAt');
+        if (!blogPosts) {
+            return res.status(400).json({success:false,message:'No blog post found'});
+        }
+        return res.status(200).json({success:true,data:blogPosts});
+    } catch (error) {
+        return res.status(500).json({success:false,message:'Internal server error'+error});
+        
+    }
+}
+
 module.exports = {
     createBlogPost,
     getBlogPosts,
@@ -152,4 +195,6 @@ module.exports = {
     getRecentPost,
     updateBlogPost,
     deleteBlogPost,
+    getBlogMetaData,
+    getBlogSiteMap
 };
