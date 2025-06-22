@@ -87,10 +87,6 @@ const getBlogPostBySlug = async (req, res) => {
         const nextPost = await BlogPost.findOne({ slug: { $gt: slug }, isDeleted: false })
             .sort({ slug: 1 })
             .select('slug');
-
-        blogPost.views += 1;
-        await blogPost.save();
-
         return res.status(200).json({
             success: true,
             data: blogPost,
@@ -185,6 +181,22 @@ const getBlogSiteMap = async(req,res)=>{
     }
 }
 
+const getPageViews = async(req,res)=>{
+    const slug = req.params.slug;
+    try{
+        const blogPosts = await BlogPost.findOne({isDeleted:false,slug}).select('views');
+        if(!blogPosts){
+            return res.status(400).json({success:false,message:'No blog post found'});
+        }
+        blogPosts.views += 1;
+        await blogPosts.save();
+        return res.status(200).json({success:true,data:blogPosts});
+    }
+    catch(error){
+        return res.status(500).json({success:false,message:'Internal server error'+error});
+    }
+}
+
 module.exports = {
     createBlogPost,
     getBlogPosts,
@@ -196,5 +208,6 @@ module.exports = {
     updateBlogPost,
     deleteBlogPost,
     getBlogMetaData,
-    getBlogSiteMap
+    getBlogSiteMap,
+    getPageViews
 };
